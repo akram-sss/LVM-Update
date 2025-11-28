@@ -83,30 +83,30 @@ nano lvm_manager.c
 ### Key settings at the top:
 
 **DRY_RUN:**
+```c
+static int DRY_RUN = 1; // dry-run mode (no real LVM changes)
 
-- static int DRY_RUN = 1; // dry-run mode (no real LVM changes)
-
-- static int DRY_RUN = 0; // real changes (shrink/extend)
-
+static int DRY_RUN = 0; // real changes (shrink/extend)
+```
 **Thresholds:**
+```c
+static const int THRESHOLD_PCT = 80; // LV becomes “HUNGRY” at or above this %
 
-- static const int THRESHOLD_PCT = 80; // LV becomes “HUNGRY” at or above this %
-
-- static const int LOW_PCT = 40; // considered over-provisioned if below this for a while
-
+static const int LOW_PCT = 40; // considered over-provisioned if below this for a while
+```
 **Fallback disk:**
-
-- static const char *FALLBACK_DEV = "/dev/sdc";
-
+```c
+static const char *FALLBACK_DEV = "/dev/sdc";
+```
 
 **Writer (load generator):**
+```c
+static const char *WRITER_BASE_PATH = "/mnt/lv_home";
 
-- static const char *WRITER_BASE_PATH = "/mnt/lv_home";
+static const int WRITER_FILE_SIZE_MB = 1;
 
-- static const int WRITER_FILE_SIZE_MB = 1;
-
-- static const int WRITER_SLEEP_USEC = 20000;
-
+static const int WRITER_SLEEP_USEC = 20000;
+```
 - Save and exit.
 
 
