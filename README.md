@@ -130,9 +130,9 @@ sudo ./lvm_manager
 ```
 **You should see:**
 
-LVM Manager starting (DRY_RUN=1) …
+- LVM Manager starting (DRY_RUN=1) …
 
-HTTP dashboard listening on 0.0.0.0:8080
+- HTTP dashboard listening on 0.0.0.0:8080
 
 **Check it’s running:**
 ```bash
@@ -141,21 +141,21 @@ ps aux | grep lvm_manager
 ```
 **Watch log output:**
 
-Writers simulate creating files under /mnt/lv_home/writer1 and writer2.
+- Writers simulate creating files under /mnt/lv_home/writer1 and writer2.
 
 **Supervisor prints:**
 
-OVER-PROVISIONED for LVs that stay below LOW_PCT for a while.
+- OVER-PROVISIONED for LVs that stay below LOW_PCT for a while.
 
-HUNGRY when an LV crosses THRESHOLD_PCT (but in DRY_RUN it only logs, no real changes).
+- HUNGRY when an LV crosses THRESHOLD_PCT (but in DRY_RUN it only logs, no real changes).
 
 **Test HTTP dashboard:**
 ```bash
 curl http://127.0.0.1:8080
 ```
-You get a JSON listing of devices, mounts, usage, and last message.
+- You get a JSON listing of devices, mounts, usage, and last message.
 
-Stop the program with Ctrl+C.
+- Stop the program with Ctrl+C.
 
 
 
@@ -195,21 +195,21 @@ df -h /mnt/lv_home # repeat dd if needed until Use% >= threshold
 ```
 2. When /mnt/lv_home crosses THRESHOLD_PCT:
 
-- Supervisor logs:
+**Supervisor logs:**
 
-Supervisor: HUNGRY LV /dev/mapper/vgdata-lv_home at /mnt/lv_home (xx%)
+- Supervisor: HUNGRY LV /dev/mapper/vgdata-lv_home at /mnt/lv_home (xx%)
 
-- Extender logs:
+**Extender logs:**
 
-Extender: processing /dev/mapper/vgdata-lv_home
+- Extender: processing /dev/mapper/vgdata-lv_home
 
-Extender: VG=vgdata LV=lv_home for device=/dev/mapper/vgdata-lv_home
+- Extender: VG=vgdata LV=lv_home for device=/dev/mapper/vgdata-lv_home
 
 3. Extender behavior:
 
-- It loops over all LVs in vgdata:
+**It loops over all LVs in vgdata:**
 
-If a sibling LV is ext4 and has at least 1 GiB free, it shrinks it by 1 GiB:
+- If a sibling LV is ext4 and has at least 1 GiB free, it shrinks it by 1 GiB:
 ```bash
 sudo lvreduce -r -L -1G /dev/vgdata/lv_data1 -y
 ```
@@ -239,15 +239,15 @@ sudo lvs -a -o +devices | grep vgdata
 
 
 ## 8. Reset the lab to a clean state
-If you want to reset everything back to the “fresh” state:
+**If you want to reset everything back to the “fresh” state:**
 
-Stop the program:
+- Stop the program:
 ```bash
 sudo pkill lvm_manager
 
 ps aux | grep lvm_manager # confirm only grep remains
 ```
-Clean test files:
+- Clean test files:
 ```bash
 sudo rm -rf /mnt/lv_home/writer*
 
@@ -255,7 +255,7 @@ sudo rm -f /mnt/lv_home/bigfile*.bin
 
 df -h /mnt/lv_home
 ```
-Reset LVs and VG (optional full reset):
+- Reset LVs and VG (optional full reset):
 ```bash
 sudo umount /mnt/lv_home /mnt/lv_data1 /mnt/lv_data2 2>/dev/null
 
@@ -265,4 +265,4 @@ sudo vgremove -f vgdata
 
 sudo pvremove -f /dev/sdb /dev/sdc 2>/dev/null
 ```
-Then repeat section 2 to recreate PV/VG/LVs and filesystems.
+- Then repeat section 2 to recreate PV/VG/LVs and filesystems.
