@@ -1,0 +1,34 @@
+# Build artifacts
+*.o
+*.a
+*.so
+lvm_manager
+
+# Editor files
+*~
+*.swp
+*.swo
+.*.swp
+.*.swo
+*.bak
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Debug files
+*.dSYM/
+core
+vgcore.*
+
+# Lock files
+*.lock
+
+# Log files
+*.log
+
+# Temporary files
+/tmp/
+*.tmp
