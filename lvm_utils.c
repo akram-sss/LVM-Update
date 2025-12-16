@@ -138,8 +138,8 @@ int should_monitor_mount(const char *mountpoint) {
 
 int parse_df_and_find_full(char out_devices[][256], char out_mounts[][256],
                            int out_use[], int *out_count) {
-    char cmd[256];
-    snprintf(cmd, sizeof(cmd), "df -P -t %s", SUPPORTED_FS_TYPES);
+    // Use simple df -P to get ALL mounted filesystems, then filter
+    const char *cmd = "df -P 2>/dev/null";
     
     FILE *fp = popen(cmd, "r");
     if (!fp) {
@@ -149,41 +149,59 @@ int parse_df_and_find_full(char out_devices[][256], char out_mounts[][256],
     
     char line[1024];
     int count = 0;
+    int line_num = 0;
     
     // Skip header
     if (!fgets(line, sizeof(line), fp)) {
         pclose(fp);
+        LOG_ERROR("DFParser", "No output from df command");
         return -1;
     }
     
+    LOG_DEBUG("DFParser", "Scanning filesystems...");
+    
     // Parse each line
     while (fgets(line, sizeof(line), fp)) {
+        line_num++;
         char dev[256], size[64], used[64], avail[64], usep[16], mount[256];
         
         int matched = sscanf(line, "%255s %63s %63s %63s %15s %255s",
                             dev, size, used, avail, usep, mount);
         
-        if (matched >= 6 && strncmp(dev, "/dev/", 5) == 0) {
-            // Parse percentage
-            char tmp[16];
-            strncpy(tmp, usep, 15);
-            tmp[15] = 0;
-            char *p = strchr(tmp, '%');
-            if (p) *p = 0;
-            int pct = atoi(tmp);
-            
-            strncpy(out_devices[count], dev, 255);
-            out_devices[count][255] = 0;
-            strncpy(out_mounts[count], mount, 255);
-            out_mounts[count][255] = 0;
-            out_use[count] = pct;
-            count++;
-            
-            if (count >= *out_count) break;
+        if (matched >= 6) {
+            // Only process devices starting with /dev/
+            if (strncmp(dev, "/dev/", 5) == 0) {
+                LOG_DEBUG("DFParser", "Found: %s mounted at %s (%s)", dev, mount, usep);
+                
+                // Parse percentage
+                char tmp[16];
+                strncpy(tmp, usep, 15);
+                tmp[15] = 0;
+                char *p = strchr(tmp, '%');
+                if (p) *p = 0;
+                int pct = atoi(tmp);
+                
+                strncpy(out_devices[count], dev, 255);
+                out_devices[count][255] = 0;
+                strncpy(out_mounts[count], mount, 255);
+                out_mounts[count][255] = 0;
+                out_use[count] = pct;
+                count++;
+                
+                if (count >= *out_count) break;
+            }
         }
     }
     
     pclose(fp);
+    
+    if (count == 0) {
+        LOG_WARN("DFParser", "No /dev/ filesystems found - are LVs mounted?");
+        LOG_INFO("DFParser", "Expected mounts: /mnt/lv_home, /mnt/lv_data1, /mnt/lv_data2");
+    } else {
+        LOG_DEBUG("DFParser", "Found %d filesystem(s)", count);
+    }
+    
     *out_count = count;
     return 0;
 }
